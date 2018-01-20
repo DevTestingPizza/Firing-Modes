@@ -170,14 +170,21 @@ namespace FiringModeClient
         /// <returns>true/false (bool), true if the weapon is found in the list, false if it's not.</returns>
         private bool IsAutomaticWeapon(int weaponHash)
         {
-            foreach (string weapon in automaticWeapons)
+            if (IsPedInAnyVehicle(PlayerPedId(), false))
             {
-                if (GetHashKey(weapon) == weaponHash)
-                {
-                    return true;
-                }
+                return false;
             }
-            return false;
+            else
+            { 
+                foreach (string weapon in automaticWeapons)
+                {
+                    if (GetHashKey(weapon) == weaponHash)
+                    {
+                        return true;
+                    }
+                }
+                return false;
+            }
         }
 
         /// <summary>
