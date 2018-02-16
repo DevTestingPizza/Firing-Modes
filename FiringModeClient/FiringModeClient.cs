@@ -62,7 +62,7 @@ namespace FiringModeClient
                     await Delay(0);
                 }
             }
-
+            
             // Only run the rest of the code when the player is holding an automatic weapon.
             if (IsAutomaticWeapon(GetSelectedPedWeapon(PlayerPedId())))
             {
