@@ -13,6 +13,8 @@ namespace FiringModeClient
         #region General variables
         private bool weaponSafety = false;
         private int firemode = 0;
+        private static int switchFiringModeKey = 7;
+        private static int safetyToggleKey = 311;
         List<string> automaticWeapons = new List<string>{
             "WEAPON_MICROSMG",
             "WEAPON_MACHINEPISTOL",
@@ -43,8 +45,28 @@ namespace FiringModeClient
         /// </summary>
         public FiringModeClient()
         {
+
+            var successfull1 = int.TryParse(GetResourceMetadata(GetCurrentResourceName(), "switchFiringModeKey", 0), out switchFiringModeKey);
+            var successfull2 = int.TryParse(GetResourceMetadata(GetCurrentResourceName(), "safetyToggleKey", 0), out safetyToggleKey);
+            if (successfull1)
+            {
+                Debug.Write($"Switch Firingmode Key has been set to: {switchFiringModeKey}");
+            }
+            if (successfull2)
+            {
+                Debug.Write($"Safety Toggle Key has been set to: {safetyToggleKey}");
+            }
+
             Tick += OnTick;
-            Tick += ShowCurrentMode;
+            if (GetResourceMetadata(GetCurrentResourceName(), "disableIcons", 0).ToString() != "true")
+            {
+                Debug.Write("Icons are enabled.");
+                Tick += ShowCurrentMode;
+            }
+            else
+            {
+                Debug.Write("Icons are disabled.");
+            }
         }
 
         /// <summary>
@@ -62,7 +84,7 @@ namespace FiringModeClient
                     await Delay(0);
                 }
             }
-            
+
             // Only run the rest of the code when the player is holding an automatic weapon.
             if (IsAutomaticWeapon(GetSelectedPedWeapon(PlayerPedId())))
             {
@@ -82,10 +104,11 @@ namespace FiringModeClient
                 }
 
                 // If the player pressed L (7/Slowmotion Cinematic Camera Button) ON KEYBOARD ONLY(!) then switch to the next firing mode.
-                if (IsInputDisabled(2) && IsControlJustPressed(0, 7))
+                if (IsInputDisabled(2) && IsControlJustPressed(0, switchFiringModeKey))
                 {
                     // Switch case for the firemode, setting it to the different options and notifying the user via a subtitle.
-                    switch (firemode) {
+                    switch (firemode)
+                    {
 
                         // If it's currently 0, make it 1 and notify the user.
                         case 0:
@@ -100,7 +123,7 @@ namespace FiringModeClient
                             CitizenFX.Core.UI.Screen.ShowSubtitle("Weapon firing mode switched to ~b~single shot~w~.", 3000);
                             PlaySoundFrontend(-1, "Place_Prop_Success", "DLC_Dmod_Prop_Editor_Sounds", false);
                             break;
-                        
+
                         // If it's currently 2 or somehow anything else, make it 0 and notify the user.
                         case 2:
                         default:
@@ -112,7 +135,7 @@ namespace FiringModeClient
                 }
 
                 // If the player pressed K (311/Rockstar Editor Keyframe Help display button) ON KEYBOARD ONLY(!) then toggle the safety mode.
-                if (IsInputDisabled(2) && IsControlJustPressed(0, 311))
+                if (IsInputDisabled(2) && IsControlJustPressed(0, safetyToggleKey))
                 {
                     weaponSafety = !weaponSafety;
                     CitizenFX.Core.UI.Screen.ShowSubtitle("~y~Weapon safety mode ~g~" + (weaponSafety ? "~g~enabled" : "~r~disabled") + "~y~.", 3000);
@@ -134,7 +157,7 @@ namespace FiringModeClient
                         while (IsControlPressed(0, 24) || IsDisabledControlPressed(0, 24))
                         {
                             DisablePlayerFiring(PlayerId(), true);
-                            
+
                             // Because we're now in a while loop, we need to add a delay to prevent the game from freezing up/crashing.
                             await Delay(0);
                         }
@@ -151,7 +174,7 @@ namespace FiringModeClient
                         while (IsControlPressed(0, 24) || IsDisabledControlPressed(0, 24))
                         {
                             DisablePlayerFiring(PlayerId(), true);
-                            
+
                             // Because we're now in a while loop, we need to add a delay to prevent the game from freezing up/crashing.
                             await Delay(0);
                         }
@@ -175,7 +198,7 @@ namespace FiringModeClient
                 return false;
             }
             else
-            { 
+            {
                 foreach (string weapon in automaticWeapons)
                 {
                     if (GetHashKey(weapon) == weaponHash)
